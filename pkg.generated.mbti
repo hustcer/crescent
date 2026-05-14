@@ -43,10 +43,15 @@ pub struct App {
   // private fields
 }
 pub fn App::App(base_path? : String) -> Self
+pub fn App::acl_raw(Self, String, HttpHandler) -> Unit
 pub fn App::all(Self, String, async (Event) -> &@core.Responder) -> Unit
 pub fn App::all_raw(Self, String, HttpHandler) -> Unit
+pub fn App::bind_raw(Self, String, HttpHandler) -> Unit
+pub fn App::checkin_raw(Self, String, HttpHandler) -> Unit
+pub fn App::checkout_raw(Self, String, HttpHandler) -> Unit
 pub fn App::connect(Self, String, async (Event) -> &@core.Responder) -> Unit
 pub fn App::connect_raw(Self, String, HttpHandler) -> Unit
+pub fn App::copy_raw(Self, String, HttpHandler) -> Unit
 pub fn App::delete(Self, String, async (Event) -> &@core.Responder) -> Unit
 pub fn App::delete_raw(Self, String, HttpHandler) -> Unit
 pub async fn App::dispatch(Self, String, String, Map[String, String], Bytes) -> (@core.StatusCode, Map[String, String], Bytes)
@@ -56,24 +61,49 @@ pub fn App::group(Self, String, (Self) -> Unit) -> Unit
 pub fn App::has_not_found_handler(Self) -> Bool
 pub fn App::head(Self, String, async (Event) -> &@core.Responder) -> Unit
 pub fn App::head_raw(Self, String, HttpHandler) -> Unit
+pub fn App::label_raw(Self, String, HttpHandler) -> Unit
+pub fn App::link_raw(Self, String, HttpHandler) -> Unit
+pub fn App::lock_raw(Self, String, HttpHandler) -> Unit
+pub fn App::merge_raw(Self, String, HttpHandler) -> Unit
+pub fn App::mkactivity_raw(Self, String, HttpHandler) -> Unit
+pub fn App::mkcalendar_raw(Self, String, HttpHandler) -> Unit
+pub fn App::mkcol_raw(Self, String, HttpHandler) -> Unit
+pub fn App::mkredirectref_raw(Self, String, HttpHandler) -> Unit
+pub fn App::mkworkspace_raw(Self, String, HttpHandler) -> Unit
+pub fn App::move_raw(Self, String, HttpHandler) -> Unit
 pub fn App::on(Self, String, String, HttpHandler) -> Unit
 pub fn App::options(Self, String, async (Event) -> &@core.Responder) -> Unit
 pub fn App::options_raw(Self, String, HttpHandler) -> Unit
+pub fn App::orderpatch_raw(Self, String, HttpHandler) -> Unit
 pub fn App::patch(Self, String, async (Event) -> &@core.Responder) -> Unit
 pub fn App::patch_raw(Self, String, HttpHandler) -> Unit
 pub fn App::post(Self, String, async (Event) -> &@core.Responder) -> Unit
 pub fn App::post_raw(Self, String, HttpHandler) -> Unit
+pub fn App::pri_raw(Self, String, HttpHandler) -> Unit
+pub fn App::propfind_raw(Self, String, HttpHandler) -> Unit
+pub fn App::proppatch_raw(Self, String, HttpHandler) -> Unit
 pub fn App::put(Self, String, async (Event) -> &@core.Responder) -> Unit
 pub fn App::put_raw(Self, String, HttpHandler) -> Unit
+pub fn App::query_raw(Self, String, HttpHandler) -> Unit
+pub fn App::rebind_raw(Self, String, HttpHandler) -> Unit
+pub fn App::report_raw(Self, String, HttpHandler) -> Unit
 pub fn App::resource(Self, String, ResourceConfig) -> Unit
 pub fn App::routes(Self) -> Iter[(String, String)]
+pub fn App::search_raw(Self, String, HttpHandler) -> Unit
 pub async fn App::serve(Self, port~ : Int, shutdown? : @aqueue.Queue[Unit], options? : NativeServeOptions) -> Unit
 pub async fn App::serve_on(Self, @http.Server, shutdown? : @aqueue.Queue[Unit], options? : NativeServeOptions) -> Unit
 pub fn App::set_not_found_handler(Self, HttpHandler) -> Unit
 pub fn App::static_assets(Self, String, &ServeStaticProvider) -> Unit
 pub fn App::trace(Self, String, async (Event) -> &@core.Responder) -> Unit
 pub fn App::trace_raw(Self, String, HttpHandler) -> Unit
+pub fn App::unbind_raw(Self, String, HttpHandler) -> Unit
+pub fn App::uncheckout_raw(Self, String, HttpHandler) -> Unit
+pub fn App::unlink_raw(Self, String, HttpHandler) -> Unit
+pub fn App::unlock_raw(Self, String, HttpHandler) -> Unit
+pub fn App::update_raw(Self, String, HttpHandler) -> Unit
+pub fn App::updateredirectref_raw(Self, String, HttpHandler) -> Unit
 pub fn App::use_middleware(Self, Middleware, base_path? : String) -> Unit
+pub fn App::version_control_raw(Self, String, HttpHandler) -> Unit
 pub fn App::ws(Self, String, @websocket.WebSocketHandler) -> Unit
 pub fn App::ws_runtime_ids(Self) -> Array[String]
 
