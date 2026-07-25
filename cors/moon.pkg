@@ -10,7 +10,7 @@ import {
 
 supported_targets = "-all+native+wasm"
 
-warnings = "-29+74"
+warnings = "-29+74-ambiguous_braces"
 
 options(
   targets: { "cors_test.mbt": [ "native" ] },

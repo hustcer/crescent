@@ -8,4 +8,4 @@ import {
   "moonbitlang/core/string",
 }
 
-warnings = "+missing_doc+unnecessary_annotation"
+warnings = "+missing_doc+unnecessary_annotation-ambiguous_braces"

@@ -13,4 +13,4 @@ import {
 
 supported_targets = "-all+native+wasm"
 
-warnings = "+missing_doc+unnecessary_annotation"
+warnings = "+missing_doc+unnecessary_annotation-ambiguous_braces"

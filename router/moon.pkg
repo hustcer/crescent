@@ -1,1 +1,1 @@
-warnings = "+missing_doc+unnecessary_annotation+74"
+warnings = "+missing_doc+unnecessary_annotation+74-ambiguous_braces"
