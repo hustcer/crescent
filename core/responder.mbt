@@ -79,7 +79,7 @@ pub impl Responder for Json with fn options(_, res) -> Unit {
 
 ///|
 pub impl Responder for Json with fn output(self, buf) -> Unit {
-  buf.write_string_utf8(self.to_json().stringify())
+  buf.write_string_utf8(self.stringify())
 }
 
 ///|
