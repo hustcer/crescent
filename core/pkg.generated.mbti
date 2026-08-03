@@ -180,4 +180,3 @@ pub impl Responder for Bytes
 pub impl Responder for Json
 pub impl Responder for &ToJson
 pub impl Responder for StringView
-
