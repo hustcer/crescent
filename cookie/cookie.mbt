@@ -134,7 +134,7 @@ pub fn parse_cookie(cookie : StringView) -> Map[String, CookieItem] {
     let key = key.to_owned()
     let value = dequote(value).to_owned()
     if last_cookie_item is Some((name, item)) {
-      let new_item = lexscan key with longest {
+      let new_item = lexmatch key with longest {
         re"^(?i:path)$" => { ..item, path: Some(value) }
         re"^(?i:domain)$" => { ..item, domain: Some(value) }
         re"^(?i:max-age)$" =>
@@ -149,7 +149,7 @@ pub fn parse_cookie(cookie : StringView) -> Map[String, CookieItem] {
         re"^(?i:secure)$" => { ..item, secure: Some(true) }
         re"^(?i:httponly)$" => { ..item, http_only: Some(true) }
         re"^(?i:samesite)$" => {
-          let same_site = lexscan value with longest {
+          let same_site = lexmatch value with longest {
             re"^(?i:lax)$" => Some(Lax)
             re"^(?i:strict)$" => Some(Strict)
             re"^(?i:none)$" => Some(SameSiteNone)
@@ -173,7 +173,7 @@ pub fn parse_cookie(cookie : StringView) -> Map[String, CookieItem] {
   for curr = cookie {
     // TODO: more spec compliance
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes
-    lexscan curr with longest {
+    lexmatch curr with longest {
       (re"^[ \t]+", after=rest) => continue rest
       (
         (re"^[^ \t=;]([ \t]*[^ \t=;])*" as key) +
