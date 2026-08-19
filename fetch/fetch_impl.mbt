@@ -221,6 +221,30 @@ fn fetch_origin(protocol : FetchProtocol, host : String, port : Int) -> String {
 }
 
 ///|
+/// Converts plain string-keyed headers into the case-insensitive header map
+/// expected by `moonbitlang/async`'s HTTP client.
+fn to_async_headers(
+  headers : Map[String, String],
+) -> Map[@http.CaseInsensitiveString, String] {
+  let out : Map[@http.CaseInsensitiveString, String] = Map([])
+  headers.each((key, value) => out.set(key, value))
+  out
+}
+
+///|
+/// Converts a case-insensitive header map returned by `moonbitlang/async`
+/// back into the plain string-keyed map used throughout Crescent.
+fn from_async_headers(
+  headers : Map[@http.CaseInsensitiveString, String],
+) -> Map[String, String] {
+  let out : Map[String, String] = Map([])
+  // Normalize to lower case so callers can look headers up directly on the
+  // plain map, matching the rest of Crescent's header handling.
+  headers.each((key, value) => out.set(key.0.to_lower(), value))
+  out
+}
+
+///|
 fn prepare_fetch_payload_bytes(
   body : String?,
   data : &@core.Responder?,
@@ -277,7 +301,7 @@ pub async fn fetch(
     client.request(
       request_method_to_async(http_method),
       path,
-      extra_headers=req_headers,
+      extra_headers=to_async_headers(req_headers),
     )
     match req_body {
       Some(body_bytes) => client.write(body_bytes)
@@ -292,7 +316,7 @@ pub async fn fetch(
     }
   HttpResponse(
     status_code=@core.StatusCode::from_int(response.code),
-    headers=@httputil.copy_headers(response.headers),
+    headers=from_async_headers(response.headers),
     raw_body=response_body,
   )
 }

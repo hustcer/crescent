@@ -148,11 +148,28 @@ async fn with_test_server(
 }
 
 ///|
+/// Asserts that every `(name, value)` pair is present in the response headers.
+/// Written as explicit lookups rather than a map pattern because the async
+/// runtime keys headers by `CaseInsensitiveString`, which map patterns cannot
+/// spell with plain string literals.
+fn assert_headers(
+  headers : Map[@http.CaseInsensitiveString, String],
+  expected : Array[(String, String)],
+  message : String,
+) -> Unit raise {
+  for pair in expected {
+    guard headers.get(pair.0) is Some(actual) && actual == pair.1 else {
+      fail(message)
+    }
+  }
+}
+
+///|
 async fn issue_request(
   port : Int,
   meth : @http.RequestMethod,
   path : String,
-  headers? : Map[String, String],
+  headers? : Map[@http.CaseInsensitiveString, String],
 ) -> (@http.Response, Bytes) {
   let client = @http.Client("http://127.0.0.1:\{port}")
   defer client.close()
@@ -197,17 +214,17 @@ async test "handle_cors serves preflight requests through async server" {
     })
     assert_eq(response.code, 200)
     assert_eq(body, b"")
-    guard response.headers
-      is {
-        "access-control-allow-origin": "https://frontend.example",
-        "access-control-allow-methods": "GET, PATCH",
-        "access-control-allow-headers": "Content-Type, Authorization",
-        "access-control-allow-credentials": "true",
-        "access-control-max-age": "7200",
-        ..
-      } else {
-      fail("missing expected preflight CORS headers")
-    }
+    assert_headers(
+      response.headers,
+      [
+        ("access-control-allow-origin", "https://frontend.example"),
+        ("access-control-allow-methods", "GET, PATCH"),
+        ("access-control-allow-headers", "Content-Type, Authorization"),
+        ("access-control-allow-credentials", "true"),
+        ("access-control-max-age", "7200"),
+      ],
+      "missing expected preflight CORS headers",
+    )
     debug_inspect(handler_called.val, content="false")
   })
 }
@@ -231,17 +248,17 @@ async test "handle_cors decorates normal requests through async server" {
     })
     assert_eq(response.code, 200)
     assert_eq(@utf8.decode(body) catch { _ => "" }, "ok")
-    guard response.headers
-      is {
-        "access-control-allow-origin": "https://frontend.example",
-        "access-control-allow-methods": "GET, POST",
-        "access-control-allow-headers": "Content-Type",
-        "access-control-expose-headers": "X-Trace-Id",
-        "access-control-allow-credentials": "true",
-        ..
-      } else {
-      fail("missing expected CORS response headers")
-    }
+    assert_headers(
+      response.headers,
+      [
+        ("access-control-allow-origin", "https://frontend.example"),
+        ("access-control-allow-methods", "GET, POST"),
+        ("access-control-allow-headers", "Content-Type"),
+        ("access-control-expose-headers", "X-Trace-Id"),
+        ("access-control-allow-credentials", "true"),
+      ],
+      "missing expected CORS response headers",
+    )
   })
 }
 
@@ -268,17 +285,17 @@ async test "handle_cors does not short-circuit non-preflight options" {
     })
     assert_eq(response.code, 200)
     assert_eq(@utf8.decode(body) catch { _ => "" }, "regular-options")
-    guard response.headers
-      is {
-        "access-control-allow-origin": "https://frontend.example",
-        "access-control-allow-methods": "GET, OPTIONS",
-        "access-control-allow-headers": "Content-Type",
-        "access-control-expose-headers": "X-Trace-Id",
-        "access-control-allow-credentials": "true",
-        ..
-      } else {
-      fail("missing expected CORS headers on non-preflight OPTIONS")
-    }
+    assert_headers(
+      response.headers,
+      [
+        ("access-control-allow-origin", "https://frontend.example"),
+        ("access-control-allow-methods", "GET, OPTIONS"),
+        ("access-control-allow-headers", "Content-Type"),
+        ("access-control-expose-headers", "X-Trace-Id"),
+        ("access-control-allow-credentials", "true"),
+      ],
+      "missing expected CORS headers on non-preflight OPTIONS",
+    )
     // non-preflight OPTIONS must NOT carry a preflight-only Max-Age
     assert_eq(response.headers.get("access-control-max-age"), None)
     debug_inspect(handler_called.val, content="true")

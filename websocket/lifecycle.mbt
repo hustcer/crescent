@@ -129,7 +129,7 @@ async fn read_native_ws_message_contents(
 
 ///|
 async fn send_native_ws_shutdown_close(ws : @async_websocket.Conn) -> Unit {
-  @async.protect_from_cancel(resume_on_cancel=true, () => {
+  @async.protect_from_cancel(() => {
     ws.send_close(code=GoingAway, reason=NATIVE_WS_SERVER_SHUTDOWN_REASON)
   }) catch {
     _ => ()
@@ -138,11 +138,11 @@ async fn send_native_ws_shutdown_close(ws : @async_websocket.Conn) -> Unit {
 
 ///|
 fn normalize_native_websocket_request_headers(
-  headers : Map[String, String],
-) -> Map[String, String] {
-  let normalized : Map[String, String] = Map([])
+  headers : Map[@http.CaseInsensitiveString, String],
+) -> Map[@http.CaseInsensitiveString, String] {
+  let normalized : Map[@http.CaseInsensitiveString, String] = Map([])
   headers.each((key, value) => {
-    let normalized_value = match key.to_lower() {
+    let normalized_value = match key.0.to_lower() {
       "connection" =>
         value.split(",").map(token => token.trim()).to_array().join(", ")
       "upgrade" | "sec-websocket-version" | "sec-websocket-key" =>

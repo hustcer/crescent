@@ -227,7 +227,7 @@ async fn send_response_async(
   conn.send_response(
     response.status_code.to_int(),
     response.status_code.to_string(),
-    extra_headers=headers,
+    extra_headers=to_async_headers(headers),
     cookies=response.cookies.values().map(to_async_http_cookie).to_array(),
   )
   if !response.raw_body.is_empty() {
@@ -257,7 +257,7 @@ async fn send_response_and_close_async(
   conn.send_response(
     response.status_code.to_int(),
     response.status_code.to_string(),
-    extra_headers=headers,
+    extra_headers=to_async_headers(headers),
     cookies=response.cookies.values().map(to_async_http_cookie).to_array(),
   )
   if !response.raw_body.is_empty() {

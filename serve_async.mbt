@@ -71,13 +71,28 @@ test "request_method_to_string converts all HTTP methods" {
   )
 }
 
-/// Copies request headers from the async runtime.
-/// Uses Map::from_iter for efficient bulk construction instead of
+/// Copies request headers from the async runtime, unwrapping the
+/// case-insensitive keys into the plain `String` keys used throughout
+/// Crescent. Uses Map::from_iter for efficient bulk construction instead of
 /// per-key insertion.
 
 ///|
-fn copy_async_headers(headers : Map[String, String]) -> Map[String, String] {
-  Map::from_iter(headers.iter())
+fn copy_async_headers(
+  headers : Map[@http.CaseInsensitiveString, String],
+) -> Map[String, String] {
+  // Lower-case the names on the way out: the async runtime compares keys
+  // case-insensitively, but Crescent's plain `Map[String, String]` does not,
+  // so handlers rely on the normalized lower-case form for direct lookups.
+  Map::from_iter(headers.iter().map(pair => (pair.0.0.to_lower(), pair.1)))
+}
+
+///|
+/// Converts Crescent's plain header map into the case-insensitive header map
+/// the async runtime expects when sending a response.
+fn to_async_headers(
+  headers : Map[String, String],
+) -> Map[@http.CaseInsensitiveString, String] {
+  Map::from_iter(headers.iter().map(pair => (pair.0, pair.1)))
 }
 
 ///|
@@ -91,12 +106,12 @@ fn next_ws_serve_runtime_id(app : App) -> String {
 
 ///|
 fn header_contains_token_case_insensitive(
-  headers : Map[String, String],
+  headers : Map[@http.CaseInsensitiveString, String],
   header_name : String,
   token_name : String,
 ) -> Bool {
   let normalized_token_name = token_name.to_lower()
-  match @httputil.get_header_case_insensitive(headers, header_name) {
+  match headers.get(header_name) {
     Some(value) => {
       for token in value.split(",") {
         if token.trim().to_lower() == normalized_token_name {
@@ -111,7 +126,9 @@ fn header_contains_token_case_insensitive(
 
 ///|
 test "header_contains_token_case_insensitive finds token in comma-separated list" {
-  let headers : Map[String, String] = { "Connection": "keep-alive, Upgrade" }
+  let headers : Map[@http.CaseInsensitiveString, String] = {
+    "Connection": "keep-alive, Upgrade",
+  }
   debug_inspect(
     header_contains_token_case_insensitive(headers, "Connection", "upgrade"),
     content="true",
@@ -120,7 +137,9 @@ test "header_contains_token_case_insensitive finds token in comma-separated list
 
 ///|
 test "header_contains_token_case_insensitive returns false when token not found" {
-  let headers : Map[String, String] = { "Connection": "keep-alive" }
+  let headers : Map[@http.CaseInsensitiveString, String] = {
+    "Connection": "keep-alive",
+  }
   debug_inspect(
     header_contains_token_case_insensitive(headers, "Connection", "upgrade"),
     content="false",
@@ -129,7 +148,9 @@ test "header_contains_token_case_insensitive returns false when token not found"
 
 ///|
 test "header_contains_token_case_insensitive is case insensitive on header name" {
-  let headers : Map[String, String] = { "CONNECTION": "Upgrade" }
+  let headers : Map[@http.CaseInsensitiveString, String] = {
+    "CONNECTION": "Upgrade",
+  }
   debug_inspect(
     header_contains_token_case_insensitive(headers, "connection", "upgrade"),
     content="true",
@@ -138,7 +159,7 @@ test "header_contains_token_case_insensitive is case insensitive on header name"
 
 ///|
 test "header_contains_token_case_insensitive returns false for missing header" {
-  let headers : Map[String, String] = Map([])
+  let headers : Map[@http.CaseInsensitiveString, String] = Map([])
   debug_inspect(
     header_contains_token_case_insensitive(headers, "Connection", "upgrade"),
     content="false",
@@ -152,8 +173,7 @@ fn @http.Request::is_websocket_upgrade_request(request : Self) -> Bool {
     "connection",
     "upgrade",
   )
-  let has_websocket_upgrade = match
-    @httputil.get_header_case_insensitive(request.headers, "upgrade") {
+  let has_websocket_upgrade = match request.headers.get("upgrade") {
     Some(value) => value.trim().to_lower() == "websocket"
     None => false
   }
@@ -198,14 +218,13 @@ test "is_websocket_upgrade_request returns false with empty headers" {
 
 ///|
 fn looks_like_websocket_handshake_request(request : @http.Request) -> Bool {
-  let websocket_upgrade_header = match
-    @httputil.get_header_case_insensitive(request.headers, "upgrade") {
+  let websocket_upgrade_header = match request.headers.get("upgrade") {
     Some(value) => value.trim().to_lower() == "websocket"
     None => false
   }
   for pair in request.headers {
     let (key, _) = pair
-    if key.to_lower().has_prefix("sec-websocket-") {
+    if key.0.to_lower().has_prefix("sec-websocket-") {
       return true
     }
   }
