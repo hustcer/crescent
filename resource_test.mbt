@@ -69,17 +69,15 @@ async test "resource registers all CRUD routes" {
   let res3 = client.get("/api/items/999")
   assert_eq(res3.status, NotFound)
   // POST /api/items — create
-  let body = @utf8.encode(
-    ({ name: "Gamma" } : CreateItem).to_json().stringify(),
-  )
+  let create_input : CreateItem = { name: "Gamma" }
+  let body = @utf8.encode(ToJson::to_json(create_input).stringify())
   let res4 = client.post("/api/items", body~)
   assert_eq(res4.status, Created)
   let created : ResourceItem = res4.body_json()
   assert_eq(created.name, "Gamma")
   // PUT /api/items/1 — update
-  let body2 = @utf8.encode(
-    ({ name: "Updated" } : CreateItem).to_json().stringify(),
-  )
+  let update_input : CreateItem = { name: "Updated" }
+  let body2 = @utf8.encode(ToJson::to_json(update_input).stringify())
   let res5 = client.put("/api/items/1", body=body2)
   assert_eq(res5.status, OK)
   let updated : ResourceItem = res5.body_json()

@@ -269,6 +269,12 @@ pub async fn handle_route_async(
   // `defer`, a failing Close handler would leak the connection entry,
   // channel memberships, and any subscriptions added during Close.
   defer unregister_native_ws_connection(connection_id)
+  // Close fires exactly once per Open regardless of how the session ended, so
+  // it is deferred here rather than repeated on the normal and the error exit.
+  // `defer` also covers async cancellation, which `catch` is not guaranteed to
+  // keep capturing. Deferred handlers unwind LIFO, so Close still runs before
+  // the unregister above.
+  defer handler(Close(snapshot_native_ws_peer(connection_id, params)))
 
   // -------------------------------------------------------------------------
   // Phase 3 + 4: Writer task + peer loop
@@ -303,19 +309,15 @@ pub async fn handle_route_async(
     // anything already enqueued, then exits, letting the group close.
     outgoing.close()
   }) catch {
-    err => {
-      // Cancellation path (server shutdown): send a 1001 GoingAway close
-      // frame so clients see an orderly shutdown instead of a TCP reset.
-      // The close helper itself is cancel-protected.
-      if @async.is_cancellation_error(err) {
-        send_native_ws_shutdown_close(ws)
-      }
-      // Close still fires on the error path — paired with the Open above.
-      handler(Close(snapshot_native_ws_peer(connection_id, params)))
+    // Cancellation path (server shutdown): send a 1001 GoingAway close frame
+    // so clients see an orderly shutdown instead of a TCP reset. The close
+    // helper itself is cancel-protected.
+    err if @async.is_cancellation_error(err) => {
+      send_native_ws_shutdown_close(ws)
       raise err
     }
+    // Every other failure propagates untouched; the deferred Close and
+    // unregister above still run.
+    err => raise err
   }
-  // Normal-exit Close. Paired with the catch-path Close above, this ensures
-  // Close fires exactly once per Open regardless of how the session ended.
-  handler(Close(snapshot_native_ws_peer(connection_id, params)))
 }

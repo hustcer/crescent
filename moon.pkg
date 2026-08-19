@@ -35,7 +35,12 @@ import {
 
 supported_targets = "-all+native+wasm"
 
-warnings = "+missing_doc+unnecessary_annotation-ambiguous_braces"
+// `-unused_package`: the test-only imports above feed the native-only
+// integration tests listed in `options.targets` below. Those files are excluded
+// from the wasm build, so on that target the imports look unused.
+// `moonbitlang/core/bigint` disables the same warning for the same reason.
+
+warnings = "+missing_doc+unnecessary_annotation-ambiguous_braces-unused_package"
 
 // These integration tests use native process and socket facilities that are not
 // available to the wasm1 test runner.

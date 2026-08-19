@@ -4,4 +4,8 @@ import {
   "moonbitlang/async/socket",
 }
 
+// `@http.Server` and `@socket.Addr` are provided on native and wasm only.
+
+supported_targets = "-all+native+wasm"
+
 pkgtype(kind: "executable")
