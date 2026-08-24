@@ -63,7 +63,7 @@ pub fn CookieItem::CookieItem(
 ///|
 fn sanitize_cookie_value(s : String) -> String {
   if s.contains("\r") || s.contains("\n") || s.contains(";") {
-    let buf = StringBuilder::new()
+    let buf = StringBuilder()
     for c in s {
       if c != '\r' && c != '\n' && c != ';' {
         buf.write_char(c)
