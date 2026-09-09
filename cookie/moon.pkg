@@ -1,5 +1,5 @@
 import {
-  "moonbitlang/core/json",
+  "moonbitlang/core/lexbuf",
   "moonbitlang/core/string",
 }
 
