@@ -1,5 +1,4 @@
 import {
-  "moonbitlang/core/lexbuf",
   "moonbitlang/core/string",
 }
 
