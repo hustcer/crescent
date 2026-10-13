@@ -227,7 +227,9 @@ async fn send_response_async(
   conn.send_response(
     response.status_code.to_int(),
     response.status_code.to_string(),
-    extra_headers=headers,
+    extra_headers=Map::from_iter(
+      headers.iter().map(entry => (CaseInsensitiveString(entry.0), entry.1)),
+    ),
     cookies=response.cookies.values().map(to_async_http_cookie).to_array(),
   )
   if !response.raw_body.is_empty() {
@@ -257,7 +259,9 @@ async fn send_response_and_close_async(
   conn.send_response(
     response.status_code.to_int(),
     response.status_code.to_string(),
-    extra_headers=headers,
+    extra_headers=Map::from_iter(
+      headers.iter().map(entry => (CaseInsensitiveString(entry.0), entry.1)),
+    ),
     cookies=response.cookies.values().map(to_async_http_cookie).to_array(),
   )
   if !response.raw_body.is_empty() {

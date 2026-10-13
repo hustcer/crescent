@@ -272,5 +272,5 @@ test double rather than intercepting the network.
 
 For integration tests that need real network I/O, stand up a second App
 on an OS-allocated port and point your fetch call at it. The crescent
-test suite's `fetch_integration_test.mbt` file follows this pattern; use
+test suite's `native_test/fetch_integration_test.mbt` file follows this pattern; use
 it as a template.

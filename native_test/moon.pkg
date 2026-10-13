@@ -1,0 +1,18 @@
+// Network integration tests need native sockets and process facilities.
+// Keep their imports out of the cross-target root test package.
+import {
+  "bobzhang/crescent",
+  "bobzhang/crescent/fetch",
+  "moonbitlang/async",
+  "moonbitlang/async/http",
+  "moonbitlang/async/os_error",
+  "moonbitlang/async/socket",
+  "moonbitlang/async/websocket",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/core/string",
+} for "test"
+
+supported_targets = "native"
+
+warnings = "+missing_doc+unnecessary_annotation"
