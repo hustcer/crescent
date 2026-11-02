@@ -72,12 +72,19 @@ test "request_method_to_string converts all HTTP methods" {
 }
 
 /// Copies request headers from the async runtime.
-/// Uses Map::from_iter for efficient bulk construction instead of
-/// per-key insertion.
 
 ///|
-fn copy_async_headers(headers : Map[String, String]) -> Map[String, String] {
-  Map::from_iter(headers.iter())
+fn copy_async_headers(headers : @http.Headers) -> Map[String, String] {
+  let result : Map[String, String] = Map([])
+  headers.each((key, value) => result[key.to_string().to_lower()] = value)
+  result
+}
+
+///|
+fn to_async_headers(headers : Map[String, String]) -> @http.Headers {
+  let result : @http.Headers = Map([])
+  headers.each((key, value) => result[CaseInsensitiveString(key)] = value)
+  result
 }
 
 ///|
@@ -148,12 +155,11 @@ test "header_contains_token_case_insensitive returns false for missing header" {
 ///|
 fn @http.Request::is_websocket_upgrade_request(request : Self) -> Bool {
   let has_connection_upgrade = header_contains_token_case_insensitive(
-    request.headers,
+    copy_async_headers(request.headers),
     "connection",
     "upgrade",
   )
-  let has_websocket_upgrade = match
-    @httputil.get_header_case_insensitive(request.headers, "upgrade") {
+  let has_websocket_upgrade = match request.headers.get("upgrade") {
     Some(value) => value.trim().to_lower() == "websocket"
     None => false
   }
@@ -198,14 +204,13 @@ test "is_websocket_upgrade_request returns false with empty headers" {
 
 ///|
 fn looks_like_websocket_handshake_request(request : @http.Request) -> Bool {
-  let websocket_upgrade_header = match
-    @httputil.get_header_case_insensitive(request.headers, "upgrade") {
+  let websocket_upgrade_header = match request.headers.get("upgrade") {
     Some(value) => value.trim().to_lower() == "websocket"
     None => false
   }
   for pair in request.headers {
     let (key, _) = pair
-    if key.to_lower().has_prefix("sec-websocket-") {
+    if key.to_string().to_lower().has_prefix("sec-websocket-") {
       return true
     }
   }
@@ -408,7 +413,7 @@ async fn App::handle_request(
   let has_content_length = request_content_length(request) is Some(len) &&
     len > 0
   let is_chunked = header_contains_token_case_insensitive(
-    request.headers,
+    copy_async_headers(request.headers),
     "transfer-encoding",
     "chunked",
   )

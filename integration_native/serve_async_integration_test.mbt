@@ -250,7 +250,7 @@ async fn issue_request(
   meth : @http.RequestMethod,
   path : String,
   body? : Bytes,
-  headers? : Map[String, String],
+  headers? : @http.Headers,
 ) -> (@http.Response, Bytes) {
   let client = @http.Client("http://127.0.0.1:\{port}")
   defer client.close()
@@ -2522,8 +2522,8 @@ async test "serve preserves content-encoding for encoded static assets" {
       headers={ "Accept-Encoding": "gzip" },
     )
     assert_eq(head_response.code, 200)
-    guard head_response.headers
-      is { "content-encoding": "gzip", "content-length": "7", .. } else {
+    guard head_response.headers.get("content-encoding") == Some("gzip") &&
+      head_response.headers.get("content-length") == Some("7") else {
       fail(
         "expected HEAD response to preserve content-encoding and content-length",
       )

@@ -272,6 +272,10 @@ pub async fn fetch(
   ignore(credentials)
   ignore(mode)
   let (req_body, req_headers) = prepare_fetch_payload_bytes(body, data, headers)
+  let async_headers : @http.Headers = Map([])
+  req_headers.each((key, value) => {
+    async_headers[CaseInsensitiveString(key)] = value
+  })
   let (protocol, host, port, path) = resolve_fetch_url(url)
   let client = @http.Client(fetch_origin(protocol, host, port)) catch {
     err => raise FetchError::RequestFailed("\{err}")
@@ -281,7 +285,7 @@ pub async fn fetch(
     client.request(
       request_method_to_async(http_method),
       path,
-      extra_headers=req_headers,
+      extra_headers=async_headers,
     )
     match req_body {
       Some(body_bytes) => client.write(body_bytes)
@@ -294,9 +298,13 @@ pub async fn fetch(
   let response_body = client.read_all().binary() catch {
       err => raise FetchError::RequestFailed("\{err}")
     }
+  let response_headers : Map[String, String] = Map([])
+  response.headers.each((key, value) => {
+    response_headers[key.to_string().to_lower()] = value
+  })
   HttpResponse(
     status_code=@core.StatusCode::from_int(response.code),
-    headers=@httputil.copy_headers(response.headers),
+    headers=response_headers,
     raw_body=response_body,
   )
 }

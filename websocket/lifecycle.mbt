@@ -129,7 +129,7 @@ async fn read_native_ws_message_contents(
 
 ///|
 async fn send_native_ws_shutdown_close(ws : @async_websocket.Conn) -> Unit {
-  @async.protect_from_cancel(resume_on_cancel=true, () => {
+  @async.protect_from_cancel(() => {
     ws.send_close(code=GoingAway, reason=NATIVE_WS_SERVER_SHUTDOWN_REASON)
   }) catch {
     _ => ()
@@ -138,11 +138,11 @@ async fn send_native_ws_shutdown_close(ws : @async_websocket.Conn) -> Unit {
 
 ///|
 fn normalize_native_websocket_request_headers(
-  headers : Map[String, String],
-) -> Map[String, String] {
-  let normalized : Map[String, String] = Map([])
+  headers : @http.Headers,
+) -> @http.Headers {
+  let normalized : @http.Headers = Map([])
   headers.each((key, value) => {
-    let normalized_value = match key.to_lower() {
+    let normalized_value = match key.to_string().to_lower() {
       "connection" =>
         value.split(",").map(token => token.trim()).to_array().join(", ")
       "upgrade" | "sec-websocket-version" | "sec-websocket-key" =>
@@ -201,8 +201,7 @@ fn normalize_native_websocket_request(request : @http.Request) -> @http.Request 
 /// Key invariants:
 ///
 /// - **`Close` fires exactly once whenever `Open` did.** Normal exit reaches
-///   the final `handler(Close(...))` at the bottom; error/cancellation goes
-///   through the `catch` block, which calls `Close` and re-raises. If the
+///   deferred `handler(Close(...))` on normal exit, error, or cancellation. If the
 ///   handshake fails (`InvalidHandshake`), neither Open nor Close fires.
 ///
 /// - **Cancellation sends a polite `GoingAway` close frame before the
@@ -281,40 +280,35 @@ pub async fn handle_route_async(
   // group's main body. When the main body exits, the group waits for the
   // writer (which outgoing.close() nudges to completion). If either task
   // raises, the group cancels the sibling and re-raises to our `catch`.
-  @async.with_task_group(group => {
-    group.spawn_bg(() => write_native_ws_outgoing(ws, outgoing))
-    // Open fires exactly once, before the first Message.
-    handler(Open(snapshot_native_ws_peer(connection_id, params)))
-    for ;; {
-      // recv_native_ws_message returns None on graceful close or read
-      // timeout (it sends the appropriate close frame internally).
-      let message = match recv_native_ws_message(ws, read_timeout_ms) {
-        Some(message) => message
-        None => break
+  let completed = @async.handle_cancellation(() => {
+    @async.with_task_group(group => {
+      group.spawn_bg(() => write_native_ws_outgoing(ws, outgoing))
+      // Open fires exactly once, before the first Message.
+      handler(Open(snapshot_native_ws_peer(connection_id, params)))
+      for ;; {
+        // recv_native_ws_message returns None on graceful close or read
+        // timeout (it sends the appropriate close frame internally).
+        let message = match recv_native_ws_message(ws, read_timeout_ms) {
+          Some(message) => message
+          None => break
+        }
+        // Re-snapshot the peer per-message: params are immutable but this
+        // yields a fresh owned WebSocketPeer view the handler can retain.
+        let peer = snapshot_native_ws_peer(connection_id, params)
+        // read_native_ws_message_contents returns None when the aggregated
+        // payload would exceed max_message_bytes; it has already sent a 1009
+        // MessageTooBig close frame, so we just exit the loop.
+        match read_native_ws_message_contents(ws, message, max_message_bytes) {
+          Some(aggregated_message) => handler(Message(peer, aggregated_message))
+          None => break
+        }
       }
-      // Re-snapshot the peer per-message: params are immutable but this
-      // yields a fresh owned WebSocketPeer view the handler can retain.
-      let peer = snapshot_native_ws_peer(connection_id, params)
-      // read_native_ws_message_contents returns None when the aggregated
-      // payload would exceed max_message_bytes; it has already sent a 1009
-      // MessageTooBig close frame, so we just exit the loop.
-      match read_native_ws_message_contents(ws, message, max_message_bytes) {
-        Some(aggregated_message) => handler(Message(peer, aggregated_message))
-        None => break
-      }
-    }
-    // Tell the writer task there will be no more messages. It drains
-    // anything already enqueued, then exits, letting the group close.
-    outgoing.close()
-  }) catch {
-    // Cancellation path (server shutdown): send a 1001 GoingAway close
-    // frame so clients see an orderly shutdown instead of a TCP reset.
-    // The close helper itself is cancel-protected. Every other error
-    // propagates untouched.
-    err if @async.is_cancellation_error(err) => {
-      send_native_ws_shutdown_close(ws)
-      raise err
-    }
-    err => raise err
+      // Tell the writer task there will be no more messages. It drains
+      // anything already enqueued, then exits, letting the group close.
+      outgoing.close()
+    })
+  })
+  if completed is None {
+    send_native_ws_shutdown_close(ws)
   }
 }
