@@ -115,10 +115,11 @@ pub(all) struct WebSocketHandler((WebSocketEvent) -> Unit)
 
 ///|
 /// Policy for handling a full outbound WebSocket message queue.
+#derive(Debug, Eq)
 pub(all) enum NativeWebSocketOverflowPolicy {
   DropOldest
   DropLatest
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend NativeWebSocketOverflowPolicy with Debug::{to_repr}

@@ -2,10 +2,11 @@
 using @crescent {type HttpResponse}
 
 ///|
+#derive(ToJson, FromJson)
 struct Person {
   name : String
   age : Int32
-} derive(ToJson, FromJson)
+}
 
 ///|
 async fn main {

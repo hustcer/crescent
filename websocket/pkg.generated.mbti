@@ -32,10 +32,11 @@ pub fn runtime_is_registered(String) -> Bool
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum NativeWebSocketOverflowPolicy {
   DropOldest
   DropLatest
-} derive(Eq, @debug.Debug)
+}
 pub fn NativeWebSocketOverflowPolicy::equal(Self, Self) -> Bool
 pub fn NativeWebSocketOverflowPolicy::not_equal(Self, Self) -> Bool
 pub fn NativeWebSocketOverflowPolicy::output(Self, &Logger) -> Unit

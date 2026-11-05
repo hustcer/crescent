@@ -1,8 +1,9 @@
 ///|
+#derive(ToJson, FromJson)
 struct BenchUser {
   id : Int32
   name : String
-} derive(ToJson, FromJson)
+}
 
 ///|
 async fn main {

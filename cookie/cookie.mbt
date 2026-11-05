@@ -1,10 +1,11 @@
 ///|
 /// The SameSite attribute for cookies, controlling cross-site request behavior.
+#derive(Debug, Eq)
 pub(all) enum SameSiteOption {
   Lax
   Strict
   SameSiteNone
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend SameSiteOption with Debug::{to_repr}
@@ -38,6 +39,7 @@ pub impl ToJson for SameSiteOption with fn to_json(self : SameSiteOption) -> Jso
 
 ///|
 /// Represents an HTTP cookie with its name, value, and optional attributes.
+#derive(Eq, Debug)
 pub(all) struct CookieItem {
   /// Cookie name (the key in `name=value`).
   name : String
@@ -55,7 +57,7 @@ pub(all) struct CookieItem {
   http_only : Bool?
   /// Cross-site request policy (`Lax`, `Strict`, or `SameSiteNone`).
   same_site : SameSiteOption?
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend CookieItem with Eq::{not_equal, equal}

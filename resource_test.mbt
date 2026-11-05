@@ -1,15 +1,17 @@
 ///|
+#derive(ToJson, FromJson, Eq, Debug)
 #warnings("-unnecessary_annotation")
 struct ResourceItem {
   id : Int32
   name : String
-} derive(ToJson, FromJson, Eq, Debug)
+}
 
 ///|
+#derive(FromJson, ToJson)
 #warnings("-unnecessary_annotation")
 struct CreateItem {
   name : String
-} derive(FromJson, ToJson)
+}
 
 ///|
 async test "resource registers all CRUD routes" {

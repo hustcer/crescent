@@ -45,25 +45,28 @@ compile to native (backend) and JS (frontend) — no code generation needed.
 
 ```moonbit nocheck
 ///|
+#derive(ToJson, FromJson)
 struct Todo {
   id : Int32
   title : String
   done : Bool
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(FromJson)
 struct CreateTodo {
   title : String
-} derive(FromJson)
+}
 ```
 
 ```mbt check
 ///|
+#derive(ToJson, FromJson, Eq)
 #warnings("-unnecessary_annotation")
 struct JsonDemoUser {
   name : String
   age : Int32
-} derive(ToJson, FromJson, Eq)
+}
 
 ///|
 test "json_value sets content-type and serializes body" {
@@ -249,10 +252,11 @@ async test "security headers are present" {
 
 ```mbt check
 ///|
+#derive(FromJson, ToJson)
 #warnings("-unnecessary_annotation")
 struct TodoInput {
   title : String
-} derive(FromJson, ToJson)
+}
 
 ///|
 async test "typed handler auto-maps errors" {
@@ -331,17 +335,19 @@ This registers `GET /api/todos`, `GET /api/todos/:id`, `POST /api/todos`,
 
 ```mbt check
 ///|
+#derive(ToJson, FromJson, Eq, Debug)
 #warnings("-unnecessary_annotation")
 struct ResItem {
   id : Int32
   name : String
-} derive(ToJson, FromJson, Eq, Debug)
+}
 
 ///|
+#derive(FromJson, ToJson)
 #warnings("-unnecessary_annotation")
 struct CreateResItem {
   name : String
-} derive(FromJson, ToJson)
+}
 
 ///|
 async test "resource CRUD" {
@@ -798,11 +804,12 @@ test "require_param raises on missing" {
 
 ```mbt check
 ///|
+#derive(FromJson)
 #warnings("-unnecessary_annotation")
 struct ReadmeCreateUser {
   name : String
   age : Int32
-} derive(FromJson)
+}
 
 ///|
 test "json parsing from request body" {

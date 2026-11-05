@@ -1,5 +1,6 @@
 ///|
 /// Error type for invalid native server configuration values.
+#derive(Debug, ToJson)
 pub suberror NativeServeError {
   InvalidMaxConnections(Int32)
   InvalidMaxRequestBodyBytes(Int32)
@@ -9,7 +10,7 @@ pub suberror NativeServeError {
   InvalidWebSocketMaxMessageBytes(Int32)
   InvalidWebSocketOutgoingQueueCapacity(Int32)
   InvalidWebSocketReadTimeoutMs(Int32)
-} derive(Debug, ToJson)
+}
 
 ///|
 pub extend NativeServeError with Debug::{to_repr}

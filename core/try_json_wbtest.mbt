@@ -1,9 +1,10 @@
 ///|
+#derive(FromJson, ToJson, Eq, Debug)
 #warnings("-unnecessary_annotation")
 struct TryJsonTestUser {
   name : String
   age : Int32
-} derive(FromJson, ToJson, Eq, Debug)
+}
 
 ///|
 pub extend TryJsonTestUser with @json.FromJson::{from_json}

@@ -1,9 +1,10 @@
 ///|
+#derive(FromJson, ToJson, Eq, Debug)
 #warnings("-unnecessary_annotation")
 struct TestUser {
   name : String
   age : Int32
-} derive(FromJson, ToJson, Eq, Debug)
+}
 
 ///|
 test "HttpRequest::json parses struct from body" {

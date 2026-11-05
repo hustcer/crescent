@@ -17,17 +17,21 @@ pub fn html(&Show) -> &@core.Responder
 pub fn text(&Show) -> &@core.Responder
 
 // Errors
-pub suberror ExecError derive(@debug.Debug)
+#derive(@debug.Debug)
+pub suberror ExecError
 pub fn ExecError::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) suberror HttpError {
   HttpError(@core.StatusCode, String)
-} derive(@debug.Debug)
+}
 pub fn HttpError::to_repr(Self) -> @debug.Repr
 
-pub suberror IOError derive(@debug.Debug)
+#derive(@debug.Debug)
+pub suberror IOError
 pub fn IOError::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug, @json.ToJson)
 pub suberror NativeServeError {
   InvalidMaxConnections(Int32)
   InvalidMaxRequestBodyBytes(Int32)
@@ -37,11 +41,12 @@ pub suberror NativeServeError {
   InvalidWebSocketMaxMessageBytes(Int32)
   InvalidWebSocketOutgoingQueueCapacity(Int32)
   InvalidWebSocketReadTimeoutMs(Int32)
-} derive(ToJson, @debug.Debug)
-pub fn NativeServeError::to_json(Self) -> Json
+}
+pub fn NativeServeError::to_json(Self) -> @json.Json
 pub fn NativeServeError::to_repr(Self) -> @debug.Repr
 
-pub suberror NetworkError derive(@debug.Debug)
+#derive(@debug.Debug)
+pub suberror NetworkError
 pub fn NetworkError::to_repr(Self) -> @debug.Repr
 
 // Types and methods

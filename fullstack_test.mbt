@@ -10,40 +10,45 @@
 // ---- Shared types (would be in a shared package for frontend+backend) ----
 
 ///|
+#derive(ToJson, FromJson, Eq, Debug)
 #warnings("-unnecessary_annotation")
 struct Todo {
   id : Int32
   title : String
   done : Bool
-} derive(ToJson, FromJson, Eq, Debug)
+}
 
 ///|
+#derive(ToJson, FromJson)
 #warnings("-unnecessary_annotation")
 struct CreateTodo {
   title : String
-} derive(ToJson, FromJson)
+}
 
 ///|
+#derive(ToJson, FromJson, Eq, Debug)
 #warnings("-unnecessary_annotation")
 struct UserProfile {
   id : Int32
   name : String
   email : String
   tags : Array[String]
-} derive(ToJson, FromJson, Eq, Debug)
+}
 
 ///|
+#derive(FromJson)
 #warnings("-unnecessary_annotation")
 struct ApiErrorWrapper {
   error : ApiErrorDetail
-} derive(FromJson)
+}
 
 ///|
+#derive(FromJson)
 #warnings("-unnecessary_annotation")
 struct ApiErrorDetail {
   status : Int32
   message : String
-} derive(FromJson)
+}
 
 // ---- Build an app (what AI agents write) ----
 
