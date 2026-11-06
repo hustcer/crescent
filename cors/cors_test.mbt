@@ -4,8 +4,8 @@ fn make_event(
   headers : Map[String, String],
 ) -> @crescent.Event {
   {
-    req: @crescent.HttpRequest(http_method, "/resource", headers, raw_body=b""),
-    res: @crescent.HttpResponse(status_code=OK),
+    req: HttpRequest(http_method, "/resource", headers, raw_body=b""),
+    res: HttpResponse(status_code=OK),
     params: {},
   }
 }
@@ -115,7 +115,7 @@ async fn allocate_test_server() -> @http.Server {
   let addr = @socket.Addr::parse("127.0.0.1:0") catch {
     _ => raise SocketBindUnavailable
   }
-  @http.Server(addr, reuse_addr=true) catch {
+  Server(addr, reuse_addr=true) catch {
     @os_error.OSError(errno, ..) if errno == 1 => raise SocketBindUnavailable
     @os_error.OSError(_) as err if err.is_EACCES() =>
       raise SocketBindUnavailable

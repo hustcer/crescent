@@ -77,7 +77,7 @@ with credentials) and sets `Vary: Origin` for correct caching.
 ///|
 test "detect preflight" {
   let event : @crescent.Event = {
-    req: @crescent.HttpRequest(
+    req: HttpRequest(
       Options,
       "/resource",
       {
@@ -86,7 +86,7 @@ test "detect preflight" {
       },
       raw_body=b"",
     ),
-    res: @crescent.HttpResponse(status_code=OK),
+    res: HttpResponse(status_code=OK),
     params: {},
   }
   debug_inspect(@cors.is_preflight_request(event), content="true")
@@ -99,13 +99,13 @@ A regular `OPTIONS` request without the CORS headers is not a preflight:
 ///|
 test "regular options is not preflight" {
   let event : @crescent.Event = {
-    req: @crescent.HttpRequest(
+    req: HttpRequest(
       Options,
       "/resource",
       { "origin": "https://example.com" },
       raw_body=b"",
     ),
-    res: @crescent.HttpResponse(status_code=OK),
+    res: HttpResponse(status_code=OK),
     params: {},
   }
   debug_inspect(@cors.is_preflight_request(event), content="false")
@@ -121,13 +121,8 @@ For manual control, use `append_cors_preflight_headers` and
 ///|
 test "append cors headers" {
   let event : @crescent.Event = {
-    req: @crescent.HttpRequest(
-      Get,
-      "/api",
-      { "origin": "https://app.com" },
-      raw_body=b"",
-    ),
-    res: @crescent.HttpResponse(status_code=OK),
+    req: HttpRequest(Get, "/api", { "origin": "https://app.com" }, raw_body=b""),
+    res: HttpResponse(status_code=OK),
     params: {},
   }
   @cors.append_cors_headers(

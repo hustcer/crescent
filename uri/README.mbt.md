@@ -295,14 +295,14 @@ Wrap calls in `try ... catch` to convert raises into `Result`:
 ///|
 test "ParseError surfaces as a Result" {
   let ok : Result[@uri.Uri, @uri.ParseError] = try
-    @uri.Uri("https://example.com/") |> Ok
+    Uri("https://example.com/") |> Ok
   catch {
     error => Err(error)
   }
   assert_true(ok is Ok(_))
 
   let bad : Result[@uri.Uri, @uri.ParseError] = try
-    @uri.Uri("http://example.com/path%GG") |> Ok
+    Uri("http://example.com/path%GG") |> Ok
   catch {
     error => Err(error)
   }

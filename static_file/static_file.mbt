@@ -129,7 +129,7 @@ pub impl ServeStaticProvider for StaticFileProvider with fn get_meta(
           let size = file.size() catch { _ => return None }
           let (mtime_sec, mtime_nsec) = file.mtime() catch { _ => return None }
           Some(
-            @crescent.StaticAssetMeta(
+            StaticAssetMeta(
               etag=static_asset_etag(mtime_sec, mtime_nsec, size),
               mtime=mtime_sec,
               path~,
