@@ -1,7 +1,6 @@
 import {
   "bobzhang/crescent",
   "moonbitlang/async",
-  "moonbitlang/core/json",
 }
 
 supported_targets = "-all+native+wasm"

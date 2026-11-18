@@ -340,7 +340,7 @@ async fn read_chunked_http_body(client : @socket.Tcp) -> String {
     }
     let chunk_len = @string.parse_int(
       chunk_len_text.trim(chars="\r\n"),
-      base=16,
+      radix=16,
     ) catch {
       _ => fail("invalid chunked response size: \{chunk_len_text}")
     }
@@ -4483,7 +4483,7 @@ async test "serve_on_until shutdown signal wakes one reused websocket server" {
                 }
               }) {
               Some(
-                Err(@websocket.ConnectionClosed(GoingAway, Some(second_reason)))
+                Err(@websocket.ConnectionClosed(GoingAway, Some(second_reason))),
               ) => inspect(second_reason, content="websocket server shutdown")
               Some(Err(@websocket.ConnectionClosed(code, reason))) =>
                 fail(
@@ -4679,7 +4679,7 @@ async test "serve_on_until queue close stops surviving reused websocket server a
                 }
               }) {
               Some(
-                Err(@websocket.ConnectionClosed(GoingAway, Some(close_reason)))
+                Err(@websocket.ConnectionClosed(GoingAway, Some(close_reason))),
               ) => inspect(close_reason, content="websocket server shutdown")
               Some(Err(@websocket.ConnectionClosed(code, reason))) =>
                 fail(

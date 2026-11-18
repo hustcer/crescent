@@ -157,7 +157,7 @@ pub fn parse_cookie(cookie : StringView) -> Map[String, CookieItem] {
     let key = key.to_owned()
     let value = dequote(value).to_owned()
     if last_cookie_item is Some((name, item)) {
-      let attribute = @lexbuf.StringScanner::{ data: key[:], cursor: 0, }
+      let attribute = @lexbuf.StringScanner(key)
       let new_item = lexscan attribute with longest {
         re"^(?i:path)$" => { ..item, path: Some(value), }
         re"^(?i:domain)$" => { ..item, domain: Some(value), }
@@ -173,7 +173,7 @@ pub fn parse_cookie(cookie : StringView) -> Map[String, CookieItem] {
         re"^(?i:secure)$" => { ..item, secure: Some(true), }
         re"^(?i:httponly)$" => { ..item, http_only: Some(true), }
         re"^(?i:samesite)$" => {
-          let policy = @lexbuf.StringScanner::{ data: value[:], cursor: 0, }
+          let policy = @lexbuf.StringScanner(value)
           let same_site = lexscan policy with longest {
             re"^(?i:lax)$" => Some(Lax)
             re"^(?i:strict)$" => Some(Strict)
@@ -197,7 +197,7 @@ pub fn parse_cookie(cookie : StringView) -> Map[String, CookieItem] {
 
   // The scanner advances its own cursor after each selected case, so the loop
   // simply re-scans the same value until no case matches.
-  let scanner = @lexbuf.StringScanner::{ data: cookie, cursor: 0, }
+  let scanner = @lexbuf.StringScanner(cookie)
   for ;; {
     // TODO: more spec compliance
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#attributes
