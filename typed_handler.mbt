@@ -16,15 +16,7 @@ fn wrap_error_handler(handler : async (Event) -> &Responder) -> HttpHandler {
       // JSON parse errors from derive(FromJson) or @json.parse
       @json.JsonDecodeError(_) as err =>
         HttpResponse::error(BadRequest, err.to_string())
-      @json.InvalidEof as err =>
-        HttpResponse::error(BadRequest, err.to_string())
-      @json.InvalidChar(_) as err =>
-        HttpResponse::error(BadRequest, err.to_string())
-      @json.InvalidNumber(_) as err =>
-        HttpResponse::error(BadRequest, err.to_string())
-      @json.InvalidIdentEscape(_) as err =>
-        HttpResponse::error(BadRequest, err.to_string())
-      @json.DepthLimitExceeded as err =>
+      @json.ParseError::_ as err =>
         HttpResponse::error(BadRequest, err.to_string())
       // UTF-8 decode failures — the client sent a body that isn't valid UTF-8
       @utf8.Malformed(_) => HttpResponse::error(BadRequest, "invalid UTF-8")
@@ -85,6 +77,24 @@ async test "wrap_error_handler catches JsonDecodeError as 400" {
   let result = handler(event)
   result.options(event.res)
   assert_eq(event.res.status_code, BadRequest)
+}
+
+///|
+async test "wrap_error_handler catches JSON syntax errors as 400" {
+  let handler = wrap_error_handler(event => {
+    let _ = @json.parse(@utf8.decode(event.req.raw_body))
+    "ok"
+  })
+  for input in ["[", "?", "1e", "\"\\q\""] {
+    let event = Event::{
+      req: HttpRequest(Post, "/", {}, raw_body=@utf8.encode(input)),
+      res: HttpResponse(status_code=OK),
+      params: {},
+    }
+    let result = handler(event)
+    result.options(event.res)
+    assert_eq(event.res.status_code, BadRequest)
+  }
 }
 
 ///|

@@ -121,7 +121,7 @@ async fn read_native_ws_message_contents(
           return None
         }
         total += chunk.length()
-        buffer.write_bytes(chunk)
+        buffer.write_bytesview(chunk)
       }
     }
   }

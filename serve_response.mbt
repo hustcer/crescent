@@ -174,7 +174,7 @@ async fn send_raw_response_async(
   }
   raw_response.write_string_utf8("\r\n")
   if include_body && !response.raw_body.is_empty() {
-    raw_response.write_bytes(response.raw_body)
+    raw_response.write_bytesview(response.raw_body)
   }
   conn.enter_passthrough_mode()
   conn.write(raw_response.contents())

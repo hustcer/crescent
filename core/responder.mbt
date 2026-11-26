@@ -36,7 +36,7 @@ pub impl Responder for HttpRequest with fn options(self, res) -> Unit {
 
 ///|
 pub impl Responder for HttpRequest with fn output(self, buf) -> Unit {
-  buf.write_bytes(self.raw_body)
+  buf.write_bytesview(self.raw_body)
 }
 
 ///|
@@ -56,7 +56,7 @@ pub impl Responder for HttpResponse with fn options(self, res) -> Unit {
 
 ///|
 pub impl Responder for HttpResponse with fn output(self, buf) -> Unit {
-  buf.write_bytes(self.raw_body)
+  buf.write_bytesview(self.raw_body)
 }
 
 ///|
@@ -98,7 +98,7 @@ pub impl Responder for Bytes with fn options(_, res) -> Unit {
 
 ///|
 pub impl Responder for Bytes with fn output(self, buf) -> Unit {
-  buf.write_bytes(self)
+  buf.write_bytesview(self)
 }
 
 ///|

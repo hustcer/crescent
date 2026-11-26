@@ -352,7 +352,7 @@ async fn read_chunked_http_body(client : @socket.Tcp) -> String {
         _ => fail("chunked response body is not valid UTF-8")
       }
     }
-    buffer.write_bytes(client.read_exactly(chunk_len))
+    buffer.write_bytesview(client.read_exactly(chunk_len))
     guard client.read_exactly(2) == b"\r\n" else {
       fail("invalid chunked response chunk terminator")
     }

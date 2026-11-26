@@ -117,7 +117,7 @@ async fn read_request_body_async(
           return RequestRejected
         }
         total += chunk.length()
-        buffer.write_bytes(chunk)
+        buffer.write_bytesview(chunk)
       }
     }
   }
